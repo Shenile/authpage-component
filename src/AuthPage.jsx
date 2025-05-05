@@ -17,52 +17,6 @@ export default function AuthPage() {
       <h1 className="font-semibold text-lg mb-2">
         {state === "logIn" ? "Log In" : "Sign Up"}
       </h1>
-      {/* <form
-        action="submit"
-        method="post"
-        className="flex flex-col gap-4 w-full my-2 "
-      >
-        <input
-          type="email"
-          name="email"
-          id="email"
-          value={signInForm.email}
-          onChange={handleFormChange}
-          required
-          className="w-full p-3 border border-gray-300 rounded-lg"
-          placeholder="email"
-        />
-
-        <input
-          type="password"
-          name="password"
-          id="password"
-          value={signInForm.password}
-          onChange={handleFormChange}
-          required
-          className="w-full p-3 border border-gray-300 rounded-lg"
-          placeholder="password"
-        />
-
-        <div>
-          <Checkbox
-            name="rememberMe"
-            onChange={handleFormChange}
-            checked={signInForm.rememberMe}
-            className="text-base"
-          />
-          <label htmlFor="rememberMe" className="px-3">
-            Remember me
-          </label>
-        </div>
-
-        <button
-          type="submit"
-          className="px-2 py-2 rounded-lg bg-blue-500 font-semibold text-white"
-        >
-          Sign Up
-        </button>
-      </form> */}
 
       {/* Oauth Block */}
       {(state === "signUp" || state === "logIn") && (
