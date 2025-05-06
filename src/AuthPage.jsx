@@ -4,7 +4,8 @@ import { FaGithub, FaFacebook } from "react-icons/fa";
 import { Checkbox } from "primereact/checkbox";
 import { MdEmail } from "react-icons/md";
 
-export default function AuthPage() {
+export default function AuthPage({ onOAuthClick, onLogIn, onSignUp }) {
+  // States = ['signUp', 'logIn', 'emailSignUp', ]
   const [state, setState] = useState("signUp");
 
   return (
@@ -20,40 +21,44 @@ export default function AuthPage() {
 
       {/* Oauth Block */}
       {(state === "signUp" || state === "logIn") && (
-        <OAuth2 state={state} setState={setState} />
+        <OAuth2 state={state} setState={setState} onOAuthClick={onOAuthClick} />
       )}
 
-      {state === "emailSignUp" && <SignUpViaEmail />}
+      {state === "emailSignUp" && <SignUpViaEmail onSignUp={onSignUp} />}
 
       {state === "logIn" && <DividerOR />}
 
-      {state === "logIn" && <LogInViaEmail />}
+      {state === "logIn" && <LogInViaEmail onLogIn={onLogIn} />}
+
       {/* forward to login */}
-      {(state === "signUp" || state === "logIn") && (
+      {/* {(state === "signUp" || state === "logIn") && ( */}
         <div className="flex flex-col items-center justify-center sm:flex-row gap-2 my-2">
-          {state === "signUp" ? <p>Already have an account ?</p> : <p>Don't have an account ?</p>}
-          
+          {(state === "signUp" || state === "emailSignUp") ? (
+            <p>Already have an account ?</p>
+          ) : (
+            <p>Don't have an account ?</p>
+          )}
+
           <button
             type="button"
             className="ml-2 underline underline-offset-2 cursor-pointer text-blue-500 "
             onClick={() => {
-              if(state === "signUp"){
+              if (state === "signUp") {
                 setState("logIn");
-              }else{
+              } else {
                 setState("signUp");
               }
-              
             }}
           >
             {state === "signUp" ? <span>Log In</span> : <span>Sign Up</span>}
           </button>
         </div>
-      )}
+      {/* )} */}
     </div>
   );
 }
 
-function LogInViaEmail() {
+function LogInViaEmail({ onLogIn }) {
   const [logInForm, setLogInForm] = useState({
     email: "",
     password: "",
@@ -78,8 +83,7 @@ function LogInViaEmail() {
 
   function handleSubmit(e) {
     e.preventDefault();
-    alert("Form submitted sucessfully", logInForm);
-    console.log(logInForm);
+    onLogIn(logInForm);
     resetForm();
   }
 
@@ -138,7 +142,7 @@ function LogInViaEmail() {
   );
 }
 
-function SignUpViaEmail() {
+function SignUpViaEmail({ onSignUp }) {
   const [signUpForm, setSignUpForm] = useState({
     name: "",
     email: "",
@@ -171,8 +175,7 @@ function SignUpViaEmail() {
       return;
     }
 
-    alert("Form submitted sucessfully", signUpForm);
-    console.log(signUpForm)
+    onSignUp(signUpForm);
     resetForm();
   }
 
@@ -215,28 +218,32 @@ function SignUpViaEmail() {
         placeholder="password"
       />
 
-      <input
-        type="password"
-        name="confirmPassword"
-        id="confirmPassword"
-        value={signUpForm.confirmPassword}
-        onChange={handleFormChange}
-        required
-        className={`w-full p-3 py-2 border rounded-lg ${
-          signUpForm.confirmPassword &&
-          signUpForm.confirmPassword !== signUpForm.password
-            ? "border-red-500"
-            : "border-gray-300"
-        }`}
-        placeholder="confirm password"
-        // onFocus={signUpForm.confirmPassword ? }
-      />
+      <div className="relative w-full group max-w-full">
+        <input
+          type="password"
+          name="confirmPassword"
+          id="confirmPassword"
+          value={signUpForm.confirmPassword}
+          onChange={handleFormChange}
+          required
+          className={`peer focus:outline-blue-500 w-full p-3 py-2 border rounded-lg ${
+            signUpForm.confirmPassword &&
+            signUpForm.confirmPassword !== signUpForm.password
+              ? "outline-red-500 border-red-500"
+              : "border-gray-300"
+          }`}
+          placeholder="confirm password"
+        />
+        {signUpForm.password !== signUpForm.confirmPassword && (
+          <p className="text-sm text-red-500 mt-2">password doesn't match</p>
+        )}
+      </div>
 
       <button
         type="submit"
-        className="px-2 py-2 rounded-lg bg-blue-500 font-semibold text-white cursor-pointer"
+        className="px-2 py-2 my-2 rounded-lg bg-blue-500 font-semibold text-white cursor-pointer"
       >
-        Sign Up
+        create account
       </button>
     </form>
   );
@@ -252,21 +259,19 @@ function DividerOR() {
   );
 }
 
-function OAuth2({ state, setState }) {
+function OAuth2({ state, setState, onOAuthClick }) {
   const OAuth = [
     {
       id: 1,
       provider: "google",
       icon: FcGoogle,
       iconColor: { light: "", dark: "" },
-      onClick() {},
     },
     {
       id: 2,
       provider: "github",
       icon: FaGithub,
       iconColor: { light: "text-gray-950", dark: "text-gray-100" },
-      onClick() {},
     },
     {
       id: 3,
@@ -276,7 +281,6 @@ function OAuth2({ state, setState }) {
         light: "text-blue-600",
         dark: "text-blue-600",
       },
-      onClick() {},
     },
     {
       id: 4,
@@ -286,22 +290,27 @@ function OAuth2({ state, setState }) {
         light: "text-gray-900",
         dark: "text-gray-100",
       },
-      onClick() {
-        setState("emailSignUp");
-      },
     },
   ];
 
   return (
     <>
       {OAuth.map((ele) => {
-        if (state === "logIn" && ele.provider === "email") return null; // skip GitHub on signUp
+        if (state === "logIn" && ele.provider === "email") return null; // skip email on login
+
+        const handleClick = () => {
+          if (ele.provider === "email") {
+            setState("emailSignUp");
+          } else if (onOAuthClick) {
+            onOAuthClick(ele.provider);
+          }
+        };
         return (
           <div
             key={ele.id}
             className="p-2 m-2 border border-gray-200 w-full 
             flex gap-2 items-center justify-center rounded-lg cursor-pointer hover:bg-gray-200"
-            onClick={ele.onClick}
+            onClick={handleClick}
           >
             <ele.icon className={ele.iconColor.light} />
             <span>
